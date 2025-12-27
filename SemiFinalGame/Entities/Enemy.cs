@@ -1,4 +1,4 @@
-﻿using SemiFinalGame.Core;
+﻿using SemiFinalGame.Entities;
 using SemiFinalGame.Extensions;
 using SemiFinalGame.Interfaces;
 using System;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SemiFinalGame.Entities
 {
-    internal class Enemy : GameObject
+    public class Enemy : GameObject
     {
         // Optional movement behavior: demonstrates composition and allows testable movement logic.
         public IMovement? Movement { get; set; }

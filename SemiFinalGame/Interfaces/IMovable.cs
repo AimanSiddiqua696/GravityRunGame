@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SemiFinalGame.Interfaces
 {
-    internal class IMovable
+    public interface IMovable
     {
         // Velocity of the object
         PointF Velocity { get; set; }

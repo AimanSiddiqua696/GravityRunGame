@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SemiFinalGame.Interfaces
 {
-    internal class IDrawable
+    public interface IDrawable
     {
         // Method to draw the object
         void Draw(Graphics graphics);

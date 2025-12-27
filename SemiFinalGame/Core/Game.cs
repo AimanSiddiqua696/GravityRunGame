@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SemiFinalGame.Core
+
+namespace SemiFinalGame.Entities
 {
-    internal class Game
+    public partial class Game
     {
         private List<GameObject> objects = new List<GameObject>();
 

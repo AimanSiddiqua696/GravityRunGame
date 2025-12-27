@@ -1,3 +1,5 @@
+using SemiFinalGame;
+
 namespace SemiFinalGame
 {
     internal static class Program

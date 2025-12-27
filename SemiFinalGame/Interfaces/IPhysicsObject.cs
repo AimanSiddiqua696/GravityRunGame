@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SemiFinalGame.Interfaces
 {
-    internal class IPhysicsObject
+    public interface IPhysicsObject
     {
         // Indicates whether physics should be applied to this object
         bool HasPhysics { get; set; }

@@ -1,5 +1,5 @@
-﻿using SemiFinalGame.Core;
-using SemiFinalGame.Entities;
+﻿using SemiFinalGame.Entities;
+//using SemiFinalGame.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SemiFinalGame.Extensions
 {
-    internal class PowerUp : GameObject
+    public class PowerUp : GameObject
     {
 
         // PowerUps don't move, so Update is intentionally empty (single responsibility: provide pickup behavior)

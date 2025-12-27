@@ -1,4 +1,4 @@
-﻿using SemiFinalGame.Core;
+﻿using SemiFinalGame.Entities;
 using SemiFinalGame.Extensions;
 using SemiFinalGame.Interfaces;
 using System;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace SemiFinalGame.Entities
 {
-    internal class Player : GameObject
+    public class Player : GameObject
     {
         // Movement strategy: demonstrates composition over inheritance.
         // Different movement behaviors can be injected (KeyboardMovement, PatrolMovement, etc.).

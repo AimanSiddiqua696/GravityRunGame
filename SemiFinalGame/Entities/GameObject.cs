@@ -1,14 +1,15 @@
-﻿using SemiFinalGame.Core;
+﻿//using SemiFinalGame.Core;
 using SemiFinalGame.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace SemiFinalGame.Entities
 {
-    internal class GameObject: IDrawable, IMovable, IMovement, IPhysicsObject, IUpdatable, IMovable, ICollidable, IPhysicsObject
+    public class GameObject : IDrawable, IUpdatable, IMovable, ICollidable, IPhysicsObject
     {
         // Position of the object in the game world (encapsulated state)
         public PointF Position { get; set; }

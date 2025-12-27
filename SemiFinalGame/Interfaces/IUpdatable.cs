@@ -1,4 +1,4 @@
-﻿using SemiFinalGame.Core;
+﻿using SemiFinalGame.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SemiFinalGame.Interfaces
 {
-    internal class IUpdatable
+    public interface IUpdatable
     {
         // Method to update the object
         void Update(GameTime gameTime);

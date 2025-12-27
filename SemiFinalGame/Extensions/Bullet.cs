@@ -1,5 +1,5 @@
-﻿using SemiFinalGame.Core;
-using SemiFinalGame.Entities;
+﻿using SemiFinalGame.Entities;
+//using SemiFinalGame.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

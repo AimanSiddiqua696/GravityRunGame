@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SemiFinalGame.Interfaces
 {
-    internal class ICollidable
+    public interface ICollidable
     {
         // Bounds of the object for collision detection
         RectangleF Bounds { get; }
