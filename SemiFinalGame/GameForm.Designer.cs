@@ -35,6 +35,7 @@
             box2 = new PictureBox();
             box1 = new PictureBox();
             tiles1 = new PictureBox();
+            lblhighscore = new Label();
             lblscore = new Label();
             ((System.ComponentModel.ISupportInitialize)tiles2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)playerdown).BeginInit();
@@ -108,6 +109,18 @@
             lblscore.TabIndex = 7;
             lblscore.Text = "Score: 0";
             // 
+            // lblhighscore
+            // 
+            lblhighscore.AutoSize = true;
+            lblhighscore.BackColor = Color.Transparent;
+            lblhighscore.Font = new Font("Segoe UI Black", 16F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblhighscore.ForeColor = Color.White;
+            lblhighscore.Location = new Point(-1, 549);
+            lblhighscore.Name = "lblhighscore";
+            lblhighscore.Size = new Size(230, 45);
+            lblhighscore.TabIndex = 8;
+            lblhighscore.Text = "High Score: 0";
+            // 
             // GameForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -115,6 +128,7 @@
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(968, 603);
+            Controls.Add(lblhighscore);
             Controls.Add(lblscore);
             Controls.Add(tiles1);
             Controls.Add(playerdown);
@@ -140,5 +154,6 @@
         private PictureBox box2;
         private PictureBox box1;
         private PictureBox tiles1;
+        private Label lblhighscore;
     }
 }
