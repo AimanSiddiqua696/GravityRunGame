@@ -29,53 +29,65 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameForm));
-            pictureBox1 = new PictureBox();
-            pictureBox2 = new PictureBox();
-            pictureBox3 = new PictureBox();
-            pictureBox4 = new PictureBox();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox4).BeginInit();
+            tiles2 = new PictureBox();
+            tiles1 = new PictureBox();
+            box1 = new PictureBox();
+            box2 = new PictureBox();
+            playerup = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)tiles2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)tiles1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)box1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)box2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)playerup).BeginInit();
             SuspendLayout();
             // 
-            // pictureBox1
+            // tiles2
             // 
-            pictureBox1.Image = Properties.Resources.platform_tilesblue;
-            pictureBox1.Location = new Point(-1, 544);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(677, 69);
-            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox1.TabIndex = 1;
-            pictureBox1.TabStop = false;
+            tiles2.Image = Properties.Resources.platform_tilesblue;
+            tiles2.Location = new Point(-1, 544);
+            tiles2.Name = "tiles2";
+            tiles2.Size = new Size(677, 69);
+            tiles2.SizeMode = PictureBoxSizeMode.StretchImage;
+            tiles2.TabIndex = 1;
+            tiles2.TabStop = false;
             // 
-            // pictureBox2
+            // tiles1
             // 
-            pictureBox2.Image = Properties.Resources.platform_tilesblue;
-            pictureBox2.Location = new Point(-1, 3);
-            pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(677, 67);
-            pictureBox2.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox2.TabIndex = 2;
-            pictureBox2.TabStop = false;
+            tiles1.Image = Properties.Resources.platform_tilesblue;
+            tiles1.Location = new Point(-1, 3);
+            tiles1.Name = "tiles1";
+            tiles1.Size = new Size(677, 67);
+            tiles1.SizeMode = PictureBoxSizeMode.StretchImage;
+            tiles1.TabIndex = 2;
+            tiles1.TabStop = false;
             // 
-            // pictureBox3
+            // box1
             // 
-            pictureBox3.Image = Properties.Resources.box;
-            pictureBox3.Location = new Point(271, 64);
-            pictureBox3.Name = "pictureBox3";
-            pictureBox3.Size = new Size(77, 157);
-            pictureBox3.TabIndex = 3;
-            pictureBox3.TabStop = false;
+            box1.Image = Properties.Resources.box;
+            box1.Location = new Point(271, 64);
+            box1.Name = "box1";
+            box1.Size = new Size(77, 157);
+            box1.TabIndex = 3;
+            box1.TabStop = false;
             // 
-            // pictureBox4
+            // box2
             // 
-            pictureBox4.Image = Properties.Resources.box;
-            pictureBox4.Location = new Point(426, 395);
-            pictureBox4.Name = "pictureBox4";
-            pictureBox4.Size = new Size(76, 154);
-            pictureBox4.TabIndex = 4;
-            pictureBox4.TabStop = false;
+            box2.Image = Properties.Resources.box;
+            box2.Location = new Point(426, 395);
+            box2.Name = "box2";
+            box2.Size = new Size(76, 154);
+            box2.TabIndex = 4;
+            box2.TabStop = false;
+            // 
+            // playerup
+            // 
+            playerup.BackColor = Color.Transparent;
+            playerup.Image = Properties.Resources.run_down0;
+            playerup.Location = new Point(23, 199);
+            playerup.Name = "playerup";
+            playerup.Size = new Size(127, 134);
+            playerup.TabIndex = 5;
+            playerup.TabStop = false;
             // 
             // GameForm
             // 
@@ -83,25 +95,28 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             ClientSize = new Size(650, 603);
-            Controls.Add(pictureBox4);
-            Controls.Add(pictureBox3);
-            Controls.Add(pictureBox2);
-            Controls.Add(pictureBox1);
+            Controls.Add(playerup);
+            Controls.Add(box2);
+            Controls.Add(box1);
+            Controls.Add(tiles1);
+            Controls.Add(tiles2);
             Name = "GameForm";
             Text = "Game Form";
             Load += GameForm_Load;
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox4).EndInit();
+            ((System.ComponentModel.ISupportInitialize)tiles2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)tiles1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)box1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)box2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)playerup).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
-        private PictureBox pictureBox1;
-        private PictureBox pictureBox2;
-        private PictureBox pictureBox3;
-        private PictureBox pictureBox4;
+        private PictureBox tiles2;
+        private PictureBox tiles1;
+        private PictureBox box1;
+        private PictureBox box2;
+        private PictureBox playerup;
     }
 }
