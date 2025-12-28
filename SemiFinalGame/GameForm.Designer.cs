@@ -28,12 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            Label lblscore;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GameForm));
             tiles2 = new PictureBox();
             playerdown = new PictureBox();
             box2 = new PictureBox();
             box1 = new PictureBox();
             tiles1 = new PictureBox();
+            lblscore = new Label();
             ((System.ComponentModel.ISupportInitialize)tiles2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)playerdown).BeginInit();
             ((System.ComponentModel.ISupportInitialize)box2).BeginInit();
@@ -58,7 +60,7 @@
             playerdown.Image = Properties.Resources.run_down0;
             playerdown.Location = new Point(23, 230);
             playerdown.Name = "playerdown";
-            playerdown.Size = new Size(99, 127);
+            playerdown.Size = new Size(73, 103);
             playerdown.SizeMode = PictureBoxSizeMode.StretchImage;
             playerdown.TabIndex = 5;
             playerdown.TabStop = false;
@@ -94,6 +96,18 @@
             tiles1.TabIndex = 6;
             tiles1.TabStop = false;
             // 
+            // lblscore
+            // 
+            lblscore.AutoSize = true;
+            lblscore.BackColor = Color.Transparent;
+            lblscore.Font = new Font("Segoe UI Black", 16F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblscore.ForeColor = Color.White;
+            lblscore.Location = new Point(23, 9);
+            lblscore.Name = "lblscore";
+            lblscore.Size = new Size(144, 45);
+            lblscore.TabIndex = 7;
+            lblscore.Text = "Score: 0";
+            // 
             // GameForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -101,6 +115,7 @@
             BackgroundImage = (Image)resources.GetObject("$this.BackgroundImage");
             BackgroundImageLayout = ImageLayout.Stretch;
             ClientSize = new Size(968, 603);
+            Controls.Add(lblscore);
             Controls.Add(tiles1);
             Controls.Add(playerdown);
             Controls.Add(box2);
@@ -115,6 +130,7 @@
             ((System.ComponentModel.ISupportInitialize)box1).EndInit();
             ((System.ComponentModel.ISupportInitialize)tiles1).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
