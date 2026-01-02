@@ -20,6 +20,7 @@ namespace SemiFinalGame
         private HorizontalMovement horizontalMovement;
         private VerticalMovement verticalMovement;
         private bool gameEnded = false;
+
         private int initialFormWidth;
         private int initialFormHeight;
 
@@ -28,6 +29,68 @@ namespace SemiFinalGame
         // movement flags
         private bool moveLeft, moveRight, moveUp, moveDown;
 
+        // Countdown Timer Fields
+        private Label countdownLabel;
+        private System.Windows.Forms.Timer startTimer;
+        private int countdownValue = 3;
+
+        private void CreateCountdownLabel()
+        {
+            countdownLabel = new Label();
+            countdownLabel.Text = "";
+            countdownLabel.Font = new Font("Arial", 72, FontStyle.Bold);
+            countdownLabel.ForeColor = Color.DarkBlue;
+            countdownLabel.BackColor = Color.Transparent;
+            countdownLabel.AutoSize = true;
+            countdownLabel.TextAlign = ContentAlignment.MiddleCenter;
+            
+            // Center it (approximate, will be refined in StartCountdown or Update)
+            countdownLabel.Location = new Point(this.ClientSize.Width / 2 - 50, this.ClientSize.Height / 2 - 50);
+            
+            this.Controls.Add(countdownLabel);
+            countdownLabel.BringToFront();
+        }
+
+        private void StartCountdown()
+        {
+            countdownValue = 3;
+            countdownLabel.Text = countdownValue.ToString();
+            countdownLabel.Location = new Point((this.ClientSize.Width - countdownLabel.Width) / 2, (this.ClientSize.Height - countdownLabel.Height) / 2); // Recenter
+            countdownLabel.Visible = true;
+
+            startTimer = new System.Windows.Forms.Timer();
+            startTimer.Interval = 1000; // 1 second
+            startTimer.Tick += StartTimer_Tick;
+            startTimer.Start();
+        }
+
+        private void StartTimer_Tick(object sender, EventArgs e)
+        {
+            countdownValue--;
+
+            if (countdownValue > 0)
+            {
+                countdownLabel.Text = countdownValue.ToString();
+            }
+            else if (countdownValue == 0)
+            {
+                countdownLabel.Text = "GO!";
+            }
+            else
+            {
+                // Countdown finished
+                startTimer.Stop();
+                startTimer.Dispose();
+                countdownLabel.Visible = false;
+
+                // START THE ACTUAL GAME
+                gameTimer.Start();
+            }
+            
+            // Keep centered
+            countdownLabel.Location = new Point((this.ClientSize.Width - countdownLabel.Width) / 2, (this.ClientSize.Height - countdownLabel.Height) / 2);
+        }
+
         private void CreatePlayer()
         {
             playerSprite = new PictureBox();
@@ -35,7 +98,7 @@ namespace SemiFinalGame
             playerSprite.Location = new Point(100, 300);
 
             //  IMAGE FROM RESOURCES
-            playerSprite.Image = Properties.Resources.run_down0;
+            playerSprite.Image = Properties.Resources.tile000;
             playerSprite.SizeMode = PictureBoxSizeMode.StretchImage;
             playerSprite.BackColor = Color.Transparent;
 
@@ -70,7 +133,7 @@ namespace SemiFinalGame
             anims["Right"] = LoadFrames("tile", 24, 8); // 024-031
 
             // Fallback if resources miss - ensure NO list is empty
-            if (anims["Down"].Count == 0) anims["Down"].Add(Properties.Resources.run_down0);
+            if (anims["Down"].Count == 0) anims["Down"].Add(Properties.Resources.tile000);
             if (anims["Up"].Count == 0) anims["Up"].AddRange(anims["Down"]); // Fallback to Down if Up missing
             if (anims["Left"].Count == 0) anims["Left"].AddRange(anims["Down"]); // Fallback
             if (anims["Right"].Count == 0) anims["Right"].AddRange(anims["Down"]); // Fallback
@@ -112,12 +175,15 @@ namespace SemiFinalGame
 
             scoreLabel.BringToFront();
 
+            CreateCountdownLabel(); // Init countdown label
+            StartCountdown();       // Start the 3-2-1 sequence
+
             horizontalMovement = new HorizontalMovement(8f);
             verticalMovement = new VerticalMovement(8f);
 
             gameTimer.Interval = 20;
             gameTimer.Tick += GameTimer_Tick;
-            gameTimer.Start();
+            // gameTimer.Start(); // Removed: Handled by StartTimer_Tick now
 
             this.KeyDown += GameForm_KeyDown;
             this.KeyUp += GameForm_KeyUp;
@@ -188,6 +254,8 @@ namespace SemiFinalGame
 
             // ================= COINS UPDATE =================
             UpdateCoins();
+
+
 
             // ================= GAME OVER AFTER LOOP =================
             if (hitObstacle)
@@ -397,7 +465,7 @@ namespace SemiFinalGame
         {
             obstacles.Clear();
 
-            int obstacleCount = 10; // 🔥 increase from 5 to 10
+            int obstacleCount = 15; // 🔥 increase from 5 to 10
             int formWidth = this.ClientSize.Width;
             int formHeight = this.ClientSize.Height;
 
@@ -426,7 +494,7 @@ namespace SemiFinalGame
                 float bottomBound = formHeight - box.Height;
 
                 // Random up/down speed
-                float speed = rnd.Next(2, 4);
+        float speed = rnd.Next(3, 7);
                 if (rnd.Next(2) == 0)
                     speed = -speed;
 
