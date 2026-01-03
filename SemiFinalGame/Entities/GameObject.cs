@@ -42,6 +42,8 @@ namespace SemiFinalGame.Entities
         // Exposed as a computed property rather than stored state (keeps consistency)
         public RectangleF Bounds => new RectangleF(Position, Size);
 
+        public float Health { get; internal set; }
+
         // Default update advances position by velocity.
         // Derived classes should call unless they fully replace movement behavior.
         // Demonstrates polymorphism and the Template Method pattern: derived types customize behavior.

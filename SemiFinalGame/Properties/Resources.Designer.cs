@@ -83,9 +83,9 @@ namespace SemiFinalGame.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Gemini_Generated_Image_14650l14650l1465_removebg_preview {
+        internal static System.Drawing.Bitmap GameOver1 {
             get {
-                object obj = ResourceManager.GetObject("Gemini_Generated_Image_14650l14650l1465-removebg-preview", resourceCulture);
+                object obj = ResourceManager.GetObject("GameOver1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -486,6 +486,16 @@ namespace SemiFinalGame.Properties {
         internal static System.Drawing.Bitmap tile031 {
             get {
                 object obj = ResourceManager.GetObject("tile031", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Victory2 {
+            get {
+                object obj = ResourceManager.GetObject("Victory2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

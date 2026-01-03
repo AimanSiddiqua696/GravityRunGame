@@ -12,6 +12,7 @@ namespace SemiFinalGame
         private List<Obstacle> obstacles = new List<Obstacle>();
         private List<Coin> coins = new List<Coin>();
         private int score = 0;
+        private int coinsCollectedCount = 0;
         private Label scoreLabel;
 
         private PictureBox playerSprite;
@@ -23,6 +24,15 @@ namespace SemiFinalGame
 
         private int initialFormWidth;
         private int initialFormHeight;
+        private int lives = 3;
+        private Label livesLabel;
+        //private bool isInvincible = false;
+
+        private Panel healthBarBackground;
+        private Panel healthBarForeground;
+        private int maxLives = 3;  // total lives
+        private bool isInvincible = false; // to prevent multi-hit per frame
+
 
 
 
@@ -182,13 +192,68 @@ namespace SemiFinalGame
             verticalMovement = new VerticalMovement(8f);
 
             gameTimer.Interval = 20;
+            gameTimer.Tick -= GameTimer_Tick; // safety
             gameTimer.Tick += GameTimer_Tick;
             // gameTimer.Start(); // Removed: Handled by StartTimer_Tick now
 
             this.KeyDown += GameForm_KeyDown;
             this.KeyUp += GameForm_KeyUp;
+            //CreateLivesLabel();
+            CreateLivesLabel();
+            CreateHealthBar();
+
+
+        }
+        private async void HandlePlayerHit()
+        {
+            if (isInvincible) return;
+            isInvincible = true;
+
+            // 1️⃣ Reduce lives
+            lives--;
+            livesLabel.Text = "Lives: " + lives;
+
+            // 2️⃣ Update health
+            float healthPercentage = (lives / (float)maxLives);
+            player.Health = (int)(healthPercentage * 100);
+            healthBarForeground.Width = (int)(healthPercentage * healthBarBackground.Width);
+
+            // 3️⃣ Reset player position
+            player.Position = new PointF(100, 300);
+            playerSprite.Left = 100;
+            playerSprite.Top = 300;
+
+            await Task.Delay(500);
+            isInvincible = false;
+
+            if (lives <= 0)
+                GameOver();
         }
 
+
+        private void CreateHealthBar()
+        {
+            // Background (gray)
+            healthBarBackground = new Panel
+            {
+                Size = new Size(150, 20),
+                BackColor = Color.Gray,
+                Location = new Point(this.ClientSize.Width - 160, 40),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+            this.Controls.Add(healthBarBackground);
+
+            // Foreground (red)
+            healthBarForeground = new Panel
+            {
+                Size = healthBarBackground.Size,
+                BackColor = Color.Green,
+                Location = healthBarBackground.Location,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
+            this.Controls.Add(healthBarForeground);
+            healthBarForeground.BringToFront();
+        }
 
         private void GameTimer_Tick(object sender, EventArgs e)
         {
@@ -239,8 +304,6 @@ namespace SemiFinalGame
             playerSprite.Top = (int)player.Position.Y;
 
             // ================= OBSTACLE UPDATE =================
-            bool hitObstacle = false;   // FLAG
-
             foreach (Obstacle obstacle in obstacles)
             {
                 obstacle.Update();
@@ -248,24 +311,14 @@ namespace SemiFinalGame
                 // Only detect collision, DO NOT call GameOver here
                 if (playerSprite.Bounds.IntersectsWith(obstacle.Sprite.Bounds))
                 {
-                    hitObstacle = true;
+                    HandlePlayerHit();
+                    break; // prevent multiple hits in same frame
                 }
             }
 
             // ================= COINS UPDATE =================
             UpdateCoins();
-
-
-
-            // ================= GAME OVER AFTER LOOP =================
-            if (hitObstacle)
-            {
-                GameOver();
-            }
         }
-
-
-
         private void GameOver()
         {
             if (gameEnded) return;
@@ -273,33 +326,39 @@ namespace SemiFinalGame
             gameEnded = true;
             gameTimer.Stop();
 
-            DialogResult result = MessageBox.Show(
-                " GAME OVER!\nDo you want to play again?",
-                "Gravity Run",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+            // Use custom GameOver form
+            using (var gameOverForm = new GameOver(score, coinsCollectedCount, lives))
+            {
+                DialogResult result = gameOverForm.ShowDialog();
 
-            if (result == DialogResult.Yes)
-                RestartGame();
-            else
-                this.Close();
+                if (result == DialogResult.Yes)
+                    RestartGame();
+                else
+                    this.Close();
+            }
             this.Focus();
         }
+
 
 
         private void RestartGame()
         {
             ResetMovementFlags();
-            // Reset flags
-            gameEnded = false;
             gameEnded = false;
 
             // Reset score
             score = 0;
+            coinsCollectedCount = 0;
             scoreLabel.Text = "Score: 0";
 
-            // Reset player
+            // ===== Reset lives and health =====
+            lives = maxLives;                      // Set lives to max
+            livesLabel.Text = "Lives: " + lives;   // Update label
+
+            player.Health = 100;                   // Reset player health
+            healthBarForeground.Width = healthBarBackground.Width; // Reset health bar
+
+            // Reset player position
             player.Position = new PointF(100, 300);
             playerSprite.Left = 100;
             playerSprite.Top = 300;
@@ -324,12 +383,11 @@ namespace SemiFinalGame
             SpawnCoins();        // IMPORTANT
             SetupObstacles();    // IMPORTANT
 
+            gameTimer.Stop();
             gameTimer.Start();
+
             this.Focus();
         }
-
-
-
 
         private void GameForm_KeyDown(object sender, KeyEventArgs e)
         {
@@ -369,7 +427,7 @@ namespace SemiFinalGame
 
             Random rnd = new Random();
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 20; i++)
             {
                 // Random position but spread across the form
                 int x = rnd.Next(50, formWidth - 50);
@@ -402,10 +460,6 @@ namespace SemiFinalGame
 
             scoreLabel.BringToFront(); // Ensure score is on top
         }
-
-
-
-
         private void UpdateCoins()
         {
             if (gameEnded) return;
@@ -420,6 +474,7 @@ namespace SemiFinalGame
                 if (playerSprite.Bounds.IntersectsWith(coin.Sprite.Bounds))
                 {
                     score += coin.Value;
+                    coinsCollectedCount++; // Track count
                     scoreLabel.Text = "Score: " + score;
 
                     this.Controls.Remove(coin.Sprite);
@@ -437,17 +492,16 @@ namespace SemiFinalGame
         }
         private void ShowWinMessage()
         {
-            DialogResult result = MessageBox.Show(
-                "🎉 YOU WON!\nDo you want to play again?",
-                "Victory",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Information
-            );
+            // Use custom VictoryForm
+            using (var victoryForm = new VictoryForm(score, coinsCollectedCount, lives))
+            {
+                DialogResult result = victoryForm.ShowDialog();
 
-            if (result == DialogResult.Yes)
-                RestartGame();
-            else
-                this.Close();
+                if (result == DialogResult.Yes)
+                    RestartGame();
+                else
+                    this.Close();
+            }
         }
         private void ResetMovementFlags()
         {
@@ -456,11 +510,6 @@ namespace SemiFinalGame
             moveUp = false;
             moveDown = false;
         }
-
-
-
-
-
         private void SetupObstacles()
         {
             obstacles.Clear();
@@ -514,6 +563,30 @@ namespace SemiFinalGame
 
         //private int initialFormWidth;
         //private int initialFormHeight;
+
+        private void CreateLivesLabel()
+        {
+            livesLabel = new Label();
+            livesLabel.Text = "Lives: 3";
+            livesLabel.Font = new Font("Arial", 16, FontStyle.Bold);
+            livesLabel.ForeColor = Color.Red;
+            livesLabel.BackColor = Color.Transparent;
+            livesLabel.AutoSize = true;
+
+            // Place near top-right initially
+            livesLabel.Location = new Point(
+                this.ClientSize.Width - livesLabel.PreferredWidth - 10,
+                10
+            );
+
+            // 🔴 THIS is the key line
+            livesLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+
+            this.Controls.Add(livesLabel);
+            livesLabel.BringToFront();
+        }
+
+
 
         private void GameForm_Resize(object sender, EventArgs e)
         {
