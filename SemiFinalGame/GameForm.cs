@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
 using SemiFinalGame.Entities;
 using SemiFinalGame.Movements;
 
@@ -43,6 +44,13 @@ namespace SemiFinalGame
         private Label countdownLabel;
         private System.Windows.Forms.Timer startTimer;
         private int countdownValue = 3;
+
+        // Background Animation Fields
+        private float backgroundX = 0;
+        private float backgroundSpeed = 2.0f; // Positive for Left-to-Right
+        private Image backgroundImage;
+        private Image backgroundImageFlipped;
+        private bool isCurrentTileFlipped = false;
 
         private void CreateCountdownLabel()
         {
@@ -202,7 +210,15 @@ namespace SemiFinalGame
             CreateLivesLabel();
             CreateHealthBar();
 
+            // Background Setup
+            backgroundImage = Properties.Resources.background_still;
+            
+            // Create the flipped version for seamless tiling
+            backgroundImageFlipped = (Image)backgroundImage.Clone();
+            backgroundImageFlipped.RotateFlip(RotateFlipType.RotateNoneFlipX);
 
+            this.BackgroundImage = null; // Disable default background rendering
+            this.DoubleBuffered = true; // Ensure this is definitely on
         }
         private async void HandlePlayerHit()
         {
@@ -316,8 +332,62 @@ namespace SemiFinalGame
                 }
             }
 
+
             // ================= COINS UPDATE =================
             UpdateCoins();
+
+            // ================= BACKGROUND ANIMATION =================
+            UpdateBackground();
+            this.Invalidate(); // trigger OnPaint
+        }
+
+        private void UpdateBackground()
+        {
+            // Move Background Left to Right
+            backgroundX += backgroundSpeed;
+
+            // Reset based on FORM WIDTH (since we stretch the image to form width)
+            if (backgroundX >= this.ClientSize.Width)
+            {
+                backgroundX = 0;
+                // Toggle the tile type to alternate between Normal and Flipped
+                isCurrentTileFlipped = !isCurrentTileFlipped;
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+
+            if (backgroundImage != null && backgroundImageFlipped != null)
+            {
+                // STRETCH Logic to fix "patches"
+                int drawWidth = this.ClientSize.Width;
+                int drawHeight = this.ClientSize.Height;
+
+                // Use High Quality Interpolation for "good pixels"
+                e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                // Determine which image is "Current" (leaving right) and "Incoming" (entering from left)
+                Image currentImage = isCurrentTileFlipped ? backgroundImageFlipped : backgroundImage;
+                Image incomingImage = isCurrentTileFlipped ? backgroundImage : backgroundImageFlipped;
+
+                // Convert float to int to prevent sub-pixel rendering gaps
+                int x = (int)Math.Round(backgroundX);
+
+                // 1. Draw current cycle (Moving from 0 to Width)
+                // Draw slightly wider (+1) or ensure overlap logic
+                e.Graphics.DrawImage(currentImage, x, 0, drawWidth, drawHeight);
+                
+                // 2. Draw incoming cycle (Moving from -Width to 0)
+                if (x > 0)
+                {
+                    // Overlap by 1 pixel to remove the seam line
+                    // Position: x - drawWidth + 1 (The +1 moves it 1 pixel to the right, creating overlap)
+                    e.Graphics.DrawImage(incomingImage, x - drawWidth + 1, 0, drawWidth, drawHeight);
+                }
+            }
         }
         private void GameOver()
         {
@@ -627,7 +697,6 @@ namespace SemiFinalGame
                     Math.Min(formWidth - coin.Sprite.Width, coin.Sprite.Left + 50)
                 );
             }
-
             // ====== Obstacles ======
             foreach (Obstacle obs in obstacles)
             {
@@ -637,7 +706,6 @@ namespace SemiFinalGame
                 obs.Sprite.Left = (int)(obsXRatio * formWidth);
                 obs.Sprite.Top = (int)(obsYRatio * formHeight);
                 obs.Body.Position = new PointF(obs.Sprite.Left, obs.Sprite.Top);
-
                 // Update vertical patrol bounds
                 if (obs.Movement is VerticalPatrolMovement)
                 {
