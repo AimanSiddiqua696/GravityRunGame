@@ -16,8 +16,8 @@ namespace SemiFinalGame
             // Hide menu
             this.Hide();
 
-            // Show Game Form
-            using (var gameForm = new GameForm())
+            // Show Game Form (Start Level 1)
+            using (var gameForm = new GameForm(1))
             {
                 gameForm.ShowDialog();
             }

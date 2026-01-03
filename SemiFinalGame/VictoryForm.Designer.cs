@@ -36,7 +36,11 @@
             this.lblLives = new System.Windows.Forms.Label();
             this.lblScoreTitle = new System.Windows.Forms.Label();
             this.lblCoinsTitle = new System.Windows.Forms.Label();
+            this.lblScoreTitle = new System.Windows.Forms.Label();
+            this.lblCoinsTitle = new System.Windows.Forms.Label();
             this.lblLivesTitle = new System.Windows.Forms.Label();
+            this.btnLevel2 = new System.Windows.Forms.Button();
+            this.lblMessage = new System.Windows.Forms.Label();
             this.SuspendLayout();
 
             // 
@@ -68,7 +72,37 @@
             this.btnExit.TabIndex = 2;
             this.btnExit.Text = "Exit";
             this.btnExit.UseVisualStyleBackColor = false;
+            this.btnExit.UseVisualStyleBackColor = false;
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
+            // 
+            // btnLevel2
+            // 
+            this.btnLevel2.BackColor = System.Drawing.Color.DarkOrange;
+            this.btnLevel2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnLevel2.FlatAppearance.BorderSize = 0;
+            this.btnLevel2.Font = new System.Drawing.Font("Arial", 16F, System.Drawing.FontStyle.Bold);
+            this.btnLevel2.ForeColor = System.Drawing.Color.White;
+            this.btnLevel2.Location = new System.Drawing.Point(340, 350); // Centered between others? Logic in OnResize
+            this.btnLevel2.Name = "btnLevel2";
+            this.btnLevel2.Size = new System.Drawing.Size(160, 60);
+            this.btnLevel2.TabIndex = 9;
+            this.btnLevel2.Text = "Level 2";
+            this.btnLevel2.UseVisualStyleBackColor = false;
+            this.btnLevel2.Visible = false; // Hidden by default
+            this.btnLevel2.Click += new System.EventHandler(this.btnLevel2_Click);
+            // 
+            // lblMessage
+            // 
+            this.lblMessage.AutoSize = true;
+            this.lblMessage.BackColor = System.Drawing.Color.Transparent;
+            this.lblMessage.Font = new System.Drawing.Font("Arial", 24F, System.Drawing.FontStyle.Bold);
+            this.lblMessage.ForeColor = System.Drawing.Color.Yellow;
+            this.lblMessage.Location = new System.Drawing.Point(200, 100); 
+            this.lblMessage.Name = "lblMessage";
+            this.lblMessage.Size = new System.Drawing.Size(0, 37);
+            this.lblMessage.TabIndex = 10;
+            this.lblMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblMessage.Visible = false;
             // 
             // lblScore
             // 
@@ -157,6 +191,8 @@
             this.Controls.Add(this.lblScore);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.btnPlayAgain);
+            this.Controls.Add(this.btnLevel2);
+            this.Controls.Add(this.lblMessage);
             this.Name = "VictoryForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Victory!";
@@ -173,6 +209,8 @@
         private System.Windows.Forms.Label lblScoreTitle;
         private System.Windows.Forms.Label lblCoinsTitle;
         private System.Windows.Forms.Label lblLivesTitle;
+        private System.Windows.Forms.Button btnLevel2;
+        private System.Windows.Forms.Label lblMessage;
 
         #endregion
     }

@@ -12,21 +12,46 @@ namespace SemiFinalGame
 {
     public partial class VictoryForm : Form
     {
-        public VictoryForm(int score, int coins, int lives)
+        public bool GoToNextLevel { get; private set; } = false;
+        private int completedLevel;
+
+        public VictoryForm(int score, int coins, int lives, int level)
         {
             InitializeComponent();
             this.FormBorderStyle = FormBorderStyle.None;
             this.WindowState = FormWindowState.Maximized;
+            this.completedLevel = level;
 
             lblScore.Text = score.ToString();
             lblCoins.Text = coins.ToString();
             lblLives.Text = lives.ToString();
+
+            // Logic for Level 2 Eligibility
+            if (completedLevel == 1)
+            {
+                lblMessage.Text = "You are eligible to play Level 2!";
+                lblMessage.Visible = true;
+                btnLevel2.Visible = true;
+                btnPlayAgain.Text = "Restart Level 1"; 
+            }
+            else
+            {
+                lblMessage.Text = "You Conquered ALL Levels!";
+                lblMessage.Visible = true;
+                btnLevel2.Visible = false;
+                btnPlayAgain.Text = "Play Again";
+            }
+            
         }
 
-        protected override void OnResize(EventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
-            base.OnResize(e);
-            
+            base.OnLoad(e);
+            UpdateLayout();
+        }
+
+        private void UpdateLayout()
+        {
             int centerX = this.ClientSize.Width / 2;
             int centerY = this.ClientSize.Height / 2;
 
@@ -49,17 +74,60 @@ namespace SemiFinalGame
             if (btnPlayAgain != null && btnExit != null)
             {
                 int gap = 20;
-                int totalWidth = btnPlayAgain.Width + btnExit.Width + gap;
+                // If Level 2 button is visible, include it in layout
+                int totalWidth;
+                bool isLevel2Visible = (btnLevel2 != null && btnLevel2.Visible);
+
+                if (isLevel2Visible)
+                {
+                    totalWidth = btnPlayAgain.Width + btnLevel2.Width + btnExit.Width + (gap * 2);
+                }
+                else
+                {
+                    totalWidth = btnPlayAgain.Width + btnExit.Width + gap;
+                }
+
                 int startX = (this.ClientSize.Width - totalWidth) / 2;
                 int y = this.ClientSize.Height - btnPlayAgain.Height - 50; 
 
                 btnPlayAgain.Location = new Point(startX, y);
-                btnExit.Location = new Point(startX + btnPlayAgain.Width + gap, y);
+                
+                if (isLevel2Visible)
+                {
+                    // Order: PlayAgain -> Exit -> Level2
+                    btnExit.Location = new Point(startX + btnPlayAgain.Width + gap, y);
+                    btnLevel2.Location = new Point(startX + btnPlayAgain.Width + btnExit.Width + (gap * 2), y);
+                }
+                else
+                {
+                    btnExit.Location = new Point(startX + btnPlayAgain.Width + gap, y);
+                }
             }
+
+            if (lblMessage != null)
+            {
+                // Move it LOWER, under the "VICTORY ACHIEVED" header
+                // Assuming header is at top, maybe Y=160 is safe?
+                lblMessage.Location = new Point((this.ClientSize.Width - lblMessage.Width) / 2, 160);
+            }
+        }
+
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            UpdateLayout();
         }
 
         private void btnPlayAgain_Click(object sender, EventArgs e)
         {
+            GoToNextLevel = false; // Just restart
+            this.DialogResult = DialogResult.Yes;
+            this.Close();
+        }
+
+        private void btnLevel2_Click(object sender, EventArgs e)
+        {
+            GoToNextLevel = true; // Signal to GameForm to increment level
             this.DialogResult = DialogResult.Yes;
             this.Close();
         }

@@ -15,6 +15,7 @@ namespace SemiFinalGame
         private int score = 0;
         private int coinsCollectedCount = 0;
         private Label scoreLabel;
+        private Label levelLabel; // Logic Level Indicator
 
         private PictureBox playerSprite;
         private GameObject player;
@@ -27,6 +28,9 @@ namespace SemiFinalGame
         private int initialFormHeight;
         private int lives = 3;
         private Label livesLabel;
+        
+        // Level System
+        private int currentLevel;
         //private bool isInvincible = false;
 
         private Panel healthBarBackground;
@@ -170,14 +174,14 @@ namespace SemiFinalGame
             }
         }
 
-        public GameForm()
+        public GameForm(int level = 1)
         {
+            this.currentLevel = level;
+            
             InitializeComponent();
             this.Resize += GameForm_Resize;
             initialFormWidth = this.ClientSize.Width;
             initialFormHeight = this.ClientSize.Height;
-
-
 
             this.DoubleBuffered = true;
             this.KeyPreview = true;
@@ -186,8 +190,11 @@ namespace SemiFinalGame
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
                 return;
 
+            SetupLevelDifficulty(currentLevel);
+
             CreatePlayer();     // Add player first
             CreateScoreLabel(); // Add score label last
+            CreateLevelLabel(); // Add level label
             SpawnCoins();       // Add coins next
             SetupObstacles();   // Add obstacles
 
@@ -196,8 +203,15 @@ namespace SemiFinalGame
             CreateCountdownLabel(); // Init countdown label
             StartCountdown();       // Start the 3-2-1 sequence
 
-            horizontalMovement = new HorizontalMovement(8f);
-            verticalMovement = new VerticalMovement(8f);
+            horizontalMovement = new HorizontalMovement(14f);
+            verticalMovement = new VerticalMovement(14f);
+
+            // Adjust player speed for Level 2
+            if (currentLevel >= 2)
+            {
+                 horizontalMovement = new HorizontalMovement(28f);
+                 verticalMovement = new VerticalMovement(28f);
+            }
 
             gameTimer.Interval = 20;
             gameTimer.Tick -= GameTimer_Tick; // safety
@@ -219,6 +233,23 @@ namespace SemiFinalGame
 
             this.BackgroundImage = null; // Disable default background rendering
             this.DoubleBuffered = true; // Ensure this is definitely on
+        }
+
+        private void SetupLevelDifficulty(int level)
+        {
+            if (level == 1)
+            {
+                backgroundSpeed = 2.0f;
+            }
+            else if (level == 2)
+            {
+                backgroundSpeed = 5.0f; // Faster background
+            }
+            else
+            {
+                // Default fallback
+                backgroundSpeed = 2.0f;
+            }
         }
         private async void HandlePlayerHit()
         {
@@ -365,9 +396,12 @@ namespace SemiFinalGame
                 int drawWidth = this.ClientSize.Width;
                 int drawHeight = this.ClientSize.Height;
 
-                // Use High Quality Interpolation for "good pixels"
-                e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                // OPTIMIZATION: Use NearestNeighbor for performance and pixel-perfect look
+                // HighQualityBicubic is too slow for large scrolling backgrounds
+                e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.None; // or HighSpeed
+                e.Graphics.CompositingQuality = CompositingQuality.HighSpeed;
+                e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
 
                 // Determine which image is "Current" (leaving right) and "Incoming" (entering from left)
                 Image currentImage = isCurrentTileFlipped ? backgroundImageFlipped : backgroundImage;
@@ -411,6 +445,7 @@ namespace SemiFinalGame
 
 
 
+
         private void RestartGame()
         {
             ResetMovementFlags();
@@ -426,7 +461,12 @@ namespace SemiFinalGame
             livesLabel.Text = "Lives: " + lives;   // Update label
 
             player.Health = 100;                   // Reset player health
-            healthBarForeground.Width = healthBarBackground.Width; // Reset health bar
+            livesLabel.Text = "Lives: " + lives;   // Update label
+
+            // Update Level Label
+            if (levelLabel != null) levelLabel.Text = "Level: " + currentLevel;
+
+            player.Health = 100;                   // Reset player health
 
             // Reset player position
             player.Position = new PointF(100, 300);
@@ -448,6 +488,9 @@ namespace SemiFinalGame
                     this.Controls.Remove(obs.Sprite);
             }
             obstacles.Clear();
+
+            // Re-setup Difficulty (in case it changed or for cleanliness)
+            SetupLevelDifficulty(currentLevel);
 
             // Spawn fresh game objects
             SpawnCoins();        // IMPORTANT
@@ -486,6 +529,21 @@ namespace SemiFinalGame
 
             this.Controls.Add(scoreLabel);
             scoreLabel.BringToFront(); // make sure it's on top of all PictureBoxes
+        }
+
+        private void CreateLevelLabel()
+        {
+            levelLabel = new Label();
+            levelLabel.Text = "Level: " + currentLevel;
+            levelLabel.Font = new Font("Arial", 16, FontStyle.Bold);
+            levelLabel.ForeColor = Color.Cyan;
+            levelLabel.BackColor = Color.Transparent;
+            levelLabel.AutoSize = true;
+            levelLabel.Location = new Point(this.ClientSize.Width - 120, 10);
+            levelLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+
+            this.Controls.Add(levelLabel);
+            levelLabel.BringToFront();
         }
 
         private void SpawnCoins()
@@ -563,14 +621,33 @@ namespace SemiFinalGame
         private void ShowWinMessage()
         {
             // Use custom VictoryForm
-            using (var victoryForm = new VictoryForm(score, coinsCollectedCount, lives))
+            // Use custom VictoryForm
+            // Pass the current level so VictoryForm can decide to show "Next Level"
+            using (var victoryForm = new VictoryForm(score, coinsCollectedCount, lives, currentLevel))
             {
                 DialogResult result = victoryForm.ShowDialog();
 
-                if (result == DialogResult.Yes)
-                    RestartGame();
+                if (result == DialogResult.Yes) // Played clicked "Level 2" or "Restart"
+                {
+                    // VictoryForm sets a static property or we handle leveling up?
+                    // Simpler: VictoryForm returns "Yes", but we need to know if it's NEXT LEVEL.
+                    // Actually, if we want to change level, we might need to close this Generic Form and open a NEW one
+                    // OR just update currentLevel and RestartGame().
+                    
+                    if (victoryForm.GoToNextLevel)
+                    {
+                        currentLevel++;
+                        RestartGame(); // Restart with new level difficulty
+                    }
+                    else
+                    {
+                        RestartGame(); // Just restart same level
+                    }
+                }
                 else
+                {
                     this.Close();
+                }
             }
         }
         private void ResetMovementFlags()
@@ -584,7 +661,12 @@ namespace SemiFinalGame
         {
             obstacles.Clear();
 
-            int obstacleCount = 15; // 🔥 increase from 5 to 10
+            int obstacleCount;
+            if (currentLevel == 2) 
+                obstacleCount = 20; // 20 obstacles for Level 2
+            else
+                obstacleCount = 10; // Default Level 1
+
             int formWidth = this.ClientSize.Width;
             int formHeight = this.ClientSize.Height;
 
@@ -613,7 +695,20 @@ namespace SemiFinalGame
                 float bottomBound = formHeight - box.Height;
 
                 // Random up/down speed
-        float speed = rnd.Next(3, 7);
+                // Random up/down speed based on Level
+                int minSpeed, maxSpeed;
+                if (currentLevel >= 2)
+                {
+                    minSpeed = 10;
+                    maxSpeed = 14;
+                }
+                else
+                {
+                    minSpeed = 5;  // Increased from 3
+                    maxSpeed = 10; // Increased from 7
+                }
+
+                float speed = rnd.Next(minSpeed, maxSpeed);
                 if (rnd.Next(2) == 0)
                     speed = -speed;
 
