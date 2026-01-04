@@ -81,12 +81,48 @@ namespace SemiFinalGame.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream CoinSound {
+            get {
+                return ResourceManager.GetStream("CoinSound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream computer_mouse_click_02_383961__1_ {
+            get {
+                return ResourceManager.GetStream("computer-mouse-click-02-383961 (1)", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream GameFormsound {
+            get {
+                return ResourceManager.GetStream("GameFormsound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap GameOver1 {
             get {
                 object obj = ResourceManager.GetObject("GameOver1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream GameOversound {
+            get {
+                return ResourceManager.GetStream("GameOversound", resourceCulture);
             }
         }
         
@@ -141,6 +177,15 @@ namespace SemiFinalGame.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream MenuFormsound {
+            get {
+                return ResourceManager.GetStream("MenuFormsound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap platform_tilesblue {
@@ -161,6 +206,15 @@ namespace SemiFinalGame.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream retro_coin_4_236671 {
+            get {
+                return ResourceManager.GetStream("retro-coin-4-236671", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap run_down0 {
@@ -176,6 +230,16 @@ namespace SemiFinalGame.Properties {
         internal static System.Drawing.Bitmap run_up0 {
             get {
                 object obj = ResourceManager.GetObject("run_up0", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap stone {
+            get {
+                object obj = ResourceManager.GetObject("stone", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -507,6 +571,15 @@ namespace SemiFinalGame.Properties {
             get {
                 object obj = ResourceManager.GetObject("Victory2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream VictoryFormsound {
+            get {
+                return ResourceManager.GetStream("VictoryFormsound", resourceCulture);
             }
         }
     }

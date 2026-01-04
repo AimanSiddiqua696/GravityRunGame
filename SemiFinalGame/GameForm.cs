@@ -12,6 +12,7 @@ namespace SemiFinalGame
     {
         private List<Obstacle> obstacles = new List<Obstacle>();
         private List<Coin> coins = new List<Coin>();
+        private List<Stone> stones = new List<Stone>(); // List to hold stones
         private int score = 0;
         private int coinsCollectedCount = 0;
         private Label scoreLabel;
@@ -22,7 +23,13 @@ namespace SemiFinalGame
 
         private HorizontalMovement horizontalMovement;
         private VerticalMovement verticalMovement;
+
         private bool gameEnded = false;
+
+        // Level 3: Chaser Enemy
+        private Enemy chaser;
+        private PictureBox chaserSprite;
+
 
         private int initialFormWidth;
         private int initialFormHeight;
@@ -197,6 +204,10 @@ namespace SemiFinalGame
             CreateLevelLabel(); // Add level label
             SpawnCoins();       // Add coins next
             SetupObstacles();   // Add obstacles
+            SetupStones();      // Add stones for Level 2
+            SetupChaser();      // Add chaser for Level 3
+
+
 
             scoreLabel.BringToFront();
 
@@ -233,6 +244,9 @@ namespace SemiFinalGame
 
             this.BackgroundImage = null; // Disable default background rendering
             this.DoubleBuffered = true; // Ensure this is definitely on
+
+            // Play Game Music
+            SemiFinalGame.Sound.SoundManager.PlayMusic(Properties.Resources.GameFormsound);
         }
 
         private void SetupLevelDifficulty(int level)
@@ -240,17 +254,22 @@ namespace SemiFinalGame
             if (level == 1)
             {
                 backgroundSpeed = 2.0f;
+                maxLives = 3;
             }
             else if (level == 2)
             {
-                backgroundSpeed = 5.0f; // Faster background
+                backgroundSpeed = 5.0f;
+                maxLives = 7;   // ✅ MORE LIVES IN LEVEL 2
             }
             else
             {
-                // Default fallback
-                backgroundSpeed = 2.0f;
+                backgroundSpeed = 6.0f;
+                maxLives = 4;
             }
+
+            lives = maxLives; // 🔴 IMPORTANT: sync lives with maxLives
         }
+
         private async void HandlePlayerHit()
         {
             if (isInvincible) return;
@@ -367,7 +386,15 @@ namespace SemiFinalGame
             // ================= COINS UPDATE =================
             UpdateCoins();
 
+            // ================= STONES UPDATE (Level 2) =================
+            UpdateStones();
+
+
+            // ================= CHASER UPDATE (Level 3) =================
+            UpdateChaser();
+
             // ================= BACKGROUND ANIMATION =================
+
             UpdateBackground();
             this.Invalidate(); // trigger OnPaint
         }
@@ -431,6 +458,7 @@ namespace SemiFinalGame
             gameTimer.Stop();
 
             // Use custom GameOver form
+            SemiFinalGame.Sound.SoundManager.StopMusic(); // Stop game music
             using (var gameOverForm = new GameOver(score, coinsCollectedCount, lives))
             {
                 DialogResult result = gameOverForm.ShowDialog();
@@ -495,9 +523,16 @@ namespace SemiFinalGame
             // Spawn fresh game objects
             SpawnCoins();        // IMPORTANT
             SetupObstacles();    // IMPORTANT
+            SetupStones();       // IMPORTANT
+            SetupChaser();       // IMPORTANT
+
+
 
             gameTimer.Stop();
             gameTimer.Start();
+            
+            // Play Game Music (for Level 2, 3, or Restart)
+            SemiFinalGame.Sound.SoundManager.PlayMusic(Properties.Resources.GameFormsound);
 
             this.Focus();
         }
@@ -539,8 +574,11 @@ namespace SemiFinalGame
             levelLabel.ForeColor = Color.Cyan;
             levelLabel.BackColor = Color.Transparent;
             levelLabel.AutoSize = true;
-            levelLabel.Location = new Point(this.ClientSize.Width - 120, 10);
+            //levelLabel.Location = new Point(this.ClientSize.Width - 120, 10);
+            levelLabel.Location = new Point(
+            this.ClientSize.Width - levelLabel.PreferredWidth - 10, 60);
             levelLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+
 
             this.Controls.Add(levelLabel);
             levelLabel.BringToFront();
@@ -604,6 +642,9 @@ namespace SemiFinalGame
                     score += coin.Value;
                     coinsCollectedCount++; // Track count
                     scoreLabel.Text = "Score: " + score;
+                    
+                    // Play Coin Sound
+                    SemiFinalGame.Sound.SoundManager.PlaySoundEffect(Properties.Resources.CoinSound);
 
                     this.Controls.Remove(coin.Sprite);
                     coins.Remove(coin);
@@ -623,6 +664,7 @@ namespace SemiFinalGame
             // Use custom VictoryForm
             // Use custom VictoryForm
             // Pass the current level so VictoryForm can decide to show "Next Level"
+            SemiFinalGame.Sound.SoundManager.StopMusic(); // Stop game music
             using (var victoryForm = new VictoryForm(score, coinsCollectedCount, lives, currentLevel))
             {
                 DialogResult result = victoryForm.ShowDialog();
@@ -663,7 +705,7 @@ namespace SemiFinalGame
 
             int obstacleCount;
             if (currentLevel == 2) 
-                obstacleCount = 20; // 20 obstacles for Level 2
+                obstacleCount = 5; // 20 obstacles for Level 2
             else
                 obstacleCount = 10; // Default Level 1
 
@@ -697,16 +739,23 @@ namespace SemiFinalGame
                 // Random up/down speed
                 // Random up/down speed based on Level
                 int minSpeed, maxSpeed;
-                if (currentLevel >= 2)
+
+                if (currentLevel == 1)
                 {
-                    minSpeed = 10;
-                    maxSpeed = 14;
+                    minSpeed = 3;
+                    maxSpeed = 6;
+                }
+                else if (currentLevel == 2)
+                {
+                    minSpeed = 6;   // ✔ faster than Level 1
+                    maxSpeed = 9;   // ✔ but slower than old Level 2
                 }
                 else
                 {
-                    minSpeed = 5;  // Increased from 3
-                    maxSpeed = 10; // Increased from 7
+                    minSpeed = 8;
+                    maxSpeed = 12;
                 }
+
 
                 float speed = rnd.Next(minSpeed, maxSpeed);
                 if (rnd.Next(2) == 0)
@@ -802,17 +851,163 @@ namespace SemiFinalGame
                 obs.Sprite.Top = (int)(obsYRatio * formHeight);
                 obs.Body.Position = new PointF(obs.Sprite.Left, obs.Sprite.Top);
                 // Update vertical patrol bounds
+                // Update vertical patrol bounds WITH LEVEL-BASED SPEED
                 if (obs.Movement is VerticalPatrolMovement)
                 {
+                    float resizeSpeed;
+
+                    if (currentLevel == 1)
+                        resizeSpeed = 4f;
+                    else if (currentLevel == 2)
+                        resizeSpeed = 7f;   // medium speed
+                    else
+                        resizeSpeed = 10f;
+
                     obs.Movement = new VerticalPatrolMovement(
                         0, // top bound
                         formHeight - obs.Sprite.Height, // bottom bound
-                        2f // default speed
+                        resizeSpeed
                     );
                 }
+
             }
         }
 
+
+        private void SetupStones()
+        {
+            // Clear existing stones
+            foreach (Stone s in stones)
+            {
+                if (this.Controls.Contains(s.Sprite))
+                    this.Controls.Remove(s.Sprite);
+            }
+            stones.Clear();
+
+            // Only spawn stones in Level 2 or higher
+            if (currentLevel < 2) return;
+
+            int stoneCount = 10; // Number of stones
+            int formWidth = this.ClientSize.Width;
+            int formHeight = this.ClientSize.Height;
+            Random rnd = new Random();
+
+            for (int i = 0; i < stoneCount; i++)
+            {
+                PictureBox stoneBox = new PictureBox();
+                stoneBox.Size = new Size(48, 48);
+                // Random starting position (some on screen, some above)
+                int x = rnd.Next(50, formWidth - 50);
+                int y = rnd.Next(-600, -50); // Start above the screen
+
+                stoneBox.Location = new Point(x, y);
+                stoneBox.Image = Properties.Resources.stone; // Assuming 'stone' resource exists
+                stoneBox.SizeMode = PictureBoxSizeMode.StretchImage;
+                stoneBox.BackColor = Color.Transparent;
+
+                this.Controls.Add(stoneBox);
+
+                // Movement: VerticalPatrolMovement but configured to just fall endlessly
+                // We set bottomBound very high so it doesn't bounce back up automatically
+                // We handle the "recycle" manually when it goes off screen
+                float speed = rnd.Next(5, 12); // Random falling speed
+                
+                // Use existing VerticalPatrolMovement
+                var movement = new VerticalPatrolMovement(-1000, formHeight + 2000, speed);
+
+                stones.Add(new Stone(stoneBox, movement));
+            }
+        }
+
+        private void UpdateStones()
+        {
+            if (gameEnded) return;
+
+            int formHeight = this.ClientSize.Height;
+            int formWidth = this.ClientSize.Width;
+            Random rnd = new Random();
+
+            foreach (Stone stone in stones)
+            {
+                stone.Update();
+
+                // Recycle: If stone goes below screen
+                if (stone.Sprite.Top > formHeight)
+                {
+                    // Reset to top with new random X
+                    int newX = rnd.Next(50, formWidth - 50);
+                    stone.Body.Position = new PointF(newX, rnd.Next(-100, -10));
+                    stone.Sprite.Top = (int)stone.Body.Position.Y;
+                    stone.Sprite.Left = (int)stone.Body.Position.X;
+                }
+
+                // Collision with Player
+                if (playerSprite.Bounds.IntersectsWith(stone.Sprite.Bounds))
+                {
+                    HandlePlayerHit();
+                    // Optional: Reset this specific stone so it doesn't hit again immediately
+                    stone.Body.Position = new PointF(stone.Body.Position.X, -100); 
+                }
+            }
+        }
+        private void SetupChaser()
+        {
+            // Clean up existing chaser
+            if (chaserSprite != null && this.Controls.Contains(chaserSprite))
+            {
+                this.Controls.Remove(chaserSprite);
+                chaserSprite.Dispose();
+                chaserSprite = null;
+            }
+            chaser = null;
+
+            if (currentLevel < 3) return;
+
+            // Create Sprite
+            chaserSprite = new PictureBox();
+            chaserSprite.Size = new Size(60, 60);
+            chaserSprite.BackColor = Color.DarkBlue; // Placeholder if no image
+            // chaserSprite.Image = ... (If you have an image, e.g. Properties.Resources.enemy);
+            chaserSprite.Location = new Point(this.ClientSize.Width - 100, 100); // Start top-right
+            chaserSprite.SizeMode = PictureBoxSizeMode.StretchImage;
+            
+            this.Controls.Add(chaserSprite);
+            chaserSprite.BringToFront();
+
+            // Create Entity
+            chaser = new Enemy();
+            chaser.Position = new PointF(chaserSprite.Left, chaserSprite.Top);
+            chaser.Size = new SizeF(chaserSprite.Width, chaserSprite.Height);
+            
+            // Movement - using the existing class ChasePlayerMovement
+            // Make sure player is created before this!
+            if (player != null)
+            {
+                // Faster than stones, but escapable
+                chaser.Movement = new ChasePlayerMovement(player, 3.5f); 
+            }
+        }
+
+        private void UpdateChaser()
+        {
+            if (gameEnded || chaser == null) return;
+
+            // Update logical position
+            chaser.Update(new GameTime { DeltaTime = 0.02f });
+
+            // Sync Sprite
+            chaserSprite.Left = (int)chaser.Position.X;
+            chaserSprite.Top = (int)chaser.Position.Y;
+
+            // Collision
+            if (playerSprite.Bounds.IntersectsWith(chaserSprite.Bounds))
+            {
+                HandlePlayerHit();
+                
+                // Optional: Pushback or reset chaser to give player a chance
+                chaser.Position = new PointF(this.ClientSize.Width - 50, chaser.Position.Y);
+            }
+        }
     }
 }
 

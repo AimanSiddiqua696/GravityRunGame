@@ -13,6 +13,12 @@ namespace SemiFinalGame
 
         private void btnStart_Click(object sender, EventArgs e)
         {
+            // Click Sound
+            SemiFinalGame.Sound.SoundManager.PlaySoundEffect(Properties.Resources.computer_mouse_click_02_383961__1_);
+
+            // Stop menu music
+            SemiFinalGame.Sound.SoundManager.StopMusic();
+
             // Hide menu
             this.Hide();
 
@@ -24,10 +30,15 @@ namespace SemiFinalGame
 
             // Show menu again when game closes
             this.Show();
+            
+            // Restart menu music
+            SemiFinalGame.Sound.SoundManager.PlayMusic(Properties.Resources.MenuFormsound);
         }
 
         private void btnExit_Click(object sender, EventArgs e)
         {
+            // Click Sound - though app might exit too fast to hear it perfectly, it's good practice
+            SemiFinalGame.Sound.SoundManager.PlaySoundEffect(Properties.Resources.computer_mouse_click_02_383961__1_);
             Application.Exit();
         }
 
@@ -36,6 +47,9 @@ namespace SemiFinalGame
              // Make full screen like game
             this.WindowState = FormWindowState.Maximized;
             this.FormBorderStyle = FormBorderStyle.None;
+            
+            // Play Menu Music
+            SemiFinalGame.Sound.SoundManager.PlayMusic(Properties.Resources.MenuFormsound);
         }
     }
 }

@@ -27,16 +27,17 @@ namespace SemiFinalGame
             lblLives.Text = lives.ToString();
 
             // Logic for Level 2 Eligibility
-            if (completedLevel == 1)
+            // Logic for Level Eligibility
+            if (completedLevel < 3) // Assuming 3 is the max level for now
             {
-                lblMessage.Text = "You are eligible to play Level 2!";
                 lblMessage.Visible = true;
                 btnLevel2.Visible = true;
-                btnPlayAgain.Text = "Restart Level 1"; 
+                btnLevel2.Text = "Level " + (completedLevel + 1); // Dynamic button text
+                btnPlayAgain.Text = "Restart Level " + completedLevel; 
             }
             else
             {
-                lblMessage.Text = "You Conquered ALL Levels!";
+                // ALL Levels Completed
                 lblMessage.Visible = true;
                 btnLevel2.Visible = false;
                 btnPlayAgain.Text = "Play Again";
@@ -48,6 +49,14 @@ namespace SemiFinalGame
         {
             base.OnLoad(e);
             UpdateLayout();
+            // Play Victory Sound
+            SemiFinalGame.Sound.SoundManager.PlayMusic(Properties.Resources.VictoryFormsound);
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            SemiFinalGame.Sound.SoundManager.StopMusic();
         }
 
         private void UpdateLayout()
@@ -120,6 +129,7 @@ namespace SemiFinalGame
 
         private void btnPlayAgain_Click(object sender, EventArgs e)
         {
+            SemiFinalGame.Sound.SoundManager.PlaySoundEffect(Properties.Resources.computer_mouse_click_02_383961__1_);
             GoToNextLevel = false; // Just restart
             this.DialogResult = DialogResult.Yes;
             this.Close();
@@ -127,6 +137,7 @@ namespace SemiFinalGame
 
         private void btnLevel2_Click(object sender, EventArgs e)
         {
+            SemiFinalGame.Sound.SoundManager.PlaySoundEffect(Properties.Resources.computer_mouse_click_02_383961__1_);
             GoToNextLevel = true; // Signal to GameForm to increment level
             this.DialogResult = DialogResult.Yes;
             this.Close();
@@ -134,6 +145,7 @@ namespace SemiFinalGame
 
         private void btnExit_Click(object sender, EventArgs e)
         {
+            SemiFinalGame.Sound.SoundManager.PlaySoundEffect(Properties.Resources.computer_mouse_click_02_383961__1_);
             this.DialogResult = DialogResult.No;
             this.Close();
         }

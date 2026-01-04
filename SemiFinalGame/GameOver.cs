@@ -23,10 +23,29 @@ namespace SemiFinalGame
             lblLives.Text = lives.ToString();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            UpdateLayout();
+            
+            // Play Game Over Sound
+            SemiFinalGame.Sound.SoundManager.PlayMusic(Properties.Resources.GameOversound);
+        }
+        
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            SemiFinalGame.Sound.SoundManager.StopMusic();
+        }
+
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
-            
+            UpdateLayout();
+        }
+
+        private void UpdateLayout()
+        {
             int centerX = this.ClientSize.Width / 2;
             int centerY = this.ClientSize.Height / 2;
 
@@ -60,12 +79,14 @@ namespace SemiFinalGame
 
         private void btnTryAgain_Click(object sender, EventArgs e)
         {
+            SemiFinalGame.Sound.SoundManager.PlaySoundEffect(Properties.Resources.computer_mouse_click_02_383961__1_);
             this.DialogResult = DialogResult.Yes;
             this.Close();
         }
 
         private void btnExit_Click(object sender, EventArgs e)
         {
+            SemiFinalGame.Sound.SoundManager.PlaySoundEffect(Properties.Resources.computer_mouse_click_02_383961__1_);
             this.DialogResult = DialogResult.No;
             this.Close();
         }
