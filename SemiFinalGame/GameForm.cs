@@ -1,9 +1,10 @@
-﻿using System;
-using System.Drawing;
-using System.Windows.Forms;
-using System.Drawing.Drawing2D;
-using SemiFinalGame.Entities;
+﻿using SemiFinalGame.Entities;
+using SemiFinalGame.FileHandling;
 using SemiFinalGame.Movements;
+using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 
 namespace SemiFinalGame
@@ -469,6 +470,7 @@ namespace SemiFinalGame
                     this.Close();
             }
             this.Focus();
+            SaveData.SaveStats(this.currentLevel, this.score, this.coinsCollectedCount, this.lives);
         }
 
 
@@ -659,8 +661,13 @@ namespace SemiFinalGame
                 ShowWinMessage();
             }
         }
+        
+        
         private void ShowWinMessage()
         {
+            // Save Stats on Level Win
+            SemiFinalGame.FileHandling.SaveData.SaveStats(this.currentLevel, this.score, this.coinsCollectedCount, this.lives);
+            
             // Use custom VictoryForm
             // Use custom VictoryForm
             // Pass the current level so VictoryForm can decide to show "Next Level"
