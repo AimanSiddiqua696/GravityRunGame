@@ -1,10 +1,15 @@
 ﻿using SemiFinalGame.Entities;
 using SemiFinalGame.FileHandling;
+using SemiFinalGame.Interfaces;
 using SemiFinalGame.Movements;
+using SemiFinalGame.Properties;
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Windows.Forms;
+using System.Net.NetworkInformation;
+using SemiFinalGame.Systems;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 namespace SemiFinalGame
@@ -18,7 +23,7 @@ namespace SemiFinalGame
         private int coinsCollectedCount = 0;
         private Label scoreLabel;
         private Label levelLabel; // Logic Level Indicator
-
+      
         private PictureBox playerSprite;
         private GameObject player;
 
@@ -36,18 +41,15 @@ namespace SemiFinalGame
         private int initialFormHeight;
         private int lives = 3;
         private Label livesLabel;
-        
+
         // Level System
         private int currentLevel;
-        //private bool isInvincible = false;
-
+       
         private Panel healthBarBackground;
         private Panel healthBarForeground;
+        private Label HealthLabel;
         private int maxLives = 3;  // total lives
         private bool isInvincible = false; // to prevent multi-hit per frame
-
-
-
 
         // movement flags
         private bool moveLeft, moveRight, moveUp, moveDown;
@@ -57,11 +59,14 @@ namespace SemiFinalGame
         private System.Windows.Forms.Timer startTimer;
         private int countdownValue = 3;
 
+        // Physics Engine
+        private PhysicsSystem physicsEngine = new PhysicsSystem();
+
         // Background Animation Fields
         private float backgroundX = 0;
         private float backgroundSpeed = 2.0f; // Positive for Left-to-Right
         private Image backgroundImage;
-        private Image backgroundImageFlipped;
+        private Image backgroundImageFlipped; //two images used for seamless looping
         private bool isCurrentTileFlipped = false;
 
         private void CreateCountdownLabel()
@@ -69,32 +74,38 @@ namespace SemiFinalGame
             countdownLabel = new Label();
             countdownLabel.Text = "";
             countdownLabel.Font = new Font("Arial", 72, FontStyle.Bold);
-            countdownLabel.ForeColor = Color.DarkBlue;
+            countdownLabel.ForeColor = Color.Red;
             countdownLabel.BackColor = Color.Transparent;
             countdownLabel.AutoSize = true;
-            countdownLabel.TextAlign = ContentAlignment.MiddleCenter;
-            
+            countdownLabel.TextAlign = ContentAlignment.MiddleCenter;//Aligns text centered inside the label
+
             // Center it (approximate, will be refined in StartCountdown or Update)
             countdownLabel.Location = new Point(this.ClientSize.Width / 2 - 50, this.ClientSize.Height / 2 - 50);
-            
-            this.Controls.Add(countdownLabel);
+            //ClientSize → usable area of the form (excluding borders)
+            this.Controls.Add(countdownLabel);//Adds the label to the form’s control collection
+
+            //Without this, the label would not appear on screen
             countdownLabel.BringToFront();
+           // Prevents it from being hidden behind player, enemies, or background
         }
 
         private void StartCountdown()
         {
             countdownValue = 3;
-            countdownLabel.Text = countdownValue.ToString();
+            countdownLabel.Text = countdownValue.ToString(); //Converts the integer 3 into text
             countdownLabel.Location = new Point((this.ClientSize.Width - countdownLabel.Width) / 2, (this.ClientSize.Height - countdownLabel.Height) / 2); // Recenter
             countdownLabel.Visible = true;
 
             startTimer = new System.Windows.Forms.Timer();
             startTimer.Interval = 1000; // 1 second
+            //Timer ticks every 1000 milliseconds
             startTimer.Tick += StartTimer_Tick;
             startTimer.Start();
         }
 
         private void StartTimer_Tick(object sender, EventArgs e)
+        //sender : The timer object that triggered the event
+        //e : Event arguments(empty in this case).
         {
             countdownValue--;
 
@@ -109,12 +120,12 @@ namespace SemiFinalGame
             else
             {
                 // Countdown finished
-                startTimer.Stop();
-                startTimer.Dispose();
-                countdownLabel.Visible = false;
+                startTimer.Stop(); //Stops the countdown timer so it won’t tick again.
+                startTimer.Dispose(); //Frees up memory used by the timer.
+                countdownLabel.Visible = false; //Hides the countdown label after it finishes.
 
                 // START THE ACTUAL GAME
-                gameTimer.Start();
+                gameTimer.Start(); //Starts the main game loop(movement, obstacles, coins, etc.)
             }
             
             // Keep centered
@@ -124,7 +135,7 @@ namespace SemiFinalGame
         private void CreatePlayer()
         {
             playerSprite = new PictureBox();
-            playerSprite.Size = new Size(64, 64);   // Increased from 48,48
+            playerSprite.Size = new Size(80, 80);   // Increased from 48,48
             playerSprite.Location = new Point(100, 300);
 
             //  IMAGE FROM RESOURCES
@@ -134,15 +145,17 @@ namespace SemiFinalGame
 
             this.Controls.Add(playerSprite);
 
-            // Link GameObject with sprite
+            // Link GameObject with sprite 
             player = new GameObject();
             player.Position = new PointF(playerSprite.Left, playerSprite.Top);
 
             // --- ANIMATION SETUP ---
-            var anims = new Dictionary<string, List<Image>>();
+            var anims = new Dictionary<string, List<Image>>(); //This will allow walking animations for different directions.
 
             // Helper to load range
             List<Image> LoadFrames(string baseName, int start, int count)
+            //LoadFrames  Loads a sequence of images for animation.
+           // baseName → Prefix of resource name(like "tile").
             {
                 var frames = new List<Image>();
                 for (int i = 0; i < count; i++)
@@ -157,12 +170,16 @@ namespace SemiFinalGame
 
             // Mapping based on tile indices
             // Mapping based on tile indices (Corrected based on visual feedback)
+            // here last parameter is 8 means that 8 number of frames are going to be to load
             anims["Down"] = LoadFrames("tile", 0, 8);   // 000-007
             anims["Up"] = LoadFrames("tile", 8, 8);     // 008-015
             anims["Left"] = LoadFrames("tile", 16, 8);  // 016-023
             anims["Right"] = LoadFrames("tile", 24, 8); // 024-031
 
             // Fallback if resources miss - ensure NO list is empty
+            //If any images are missing, uses "Down" frames as fallback.
+
+            //Prevents crashes when animation tries to display a missing frame.
             if (anims["Down"].Count == 0) anims["Down"].Add(Properties.Resources.tile000);
             if (anims["Up"].Count == 0) anims["Up"].AddRange(anims["Down"]); // Fallback to Down if Up missing
             if (anims["Left"].Count == 0) anims["Left"].AddRange(anims["Down"]); // Fallback
@@ -174,11 +191,13 @@ namespace SemiFinalGame
             }
             else
             {
+                //If not : converts GameObject into Player, keeps the position, and sets animation.
                 // Re-create as Player if it was just GameObject
                 var oldPos = player.Position;
                 player = new Player(); 
                 player.Position = oldPos;
                 ((Player)player).SetAnimation(anims, "Down");
+                //Player class is specialized for movement + animations, while GameObject is just a logical container.
             }
         }
 
@@ -186,13 +205,13 @@ namespace SemiFinalGame
         {
             this.currentLevel = level;
             
-            InitializeComponent();
+            InitializeComponent();//Sets up all the controls defined in the Designer (buttons, labels, etc.) before you add custom logic.
             this.Resize += GameForm_Resize;
             initialFormWidth = this.ClientSize.Width;
             initialFormHeight = this.ClientSize.Height;
 
-            this.DoubleBuffered = true;
-            this.KeyPreview = true;
+            this.DoubleBuffered = true; // prevents flickering when redrawing graphics.
+            this.KeyPreview = true; //allows the form to detect key presses even if a control (like a button) is focused.
 
             // Prevent runtime logic from running in the Designer
             if (System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
@@ -224,15 +243,14 @@ namespace SemiFinalGame
                  horizontalMovement = new HorizontalMovement(28f);
                  verticalMovement = new VerticalMovement(28f);
             }
-
+            //Sets game loop timer to tick every 20ms
             gameTimer.Interval = 20;
             gameTimer.Tick -= GameTimer_Tick; // safety
-            gameTimer.Tick += GameTimer_Tick;
-            // gameTimer.Start(); // Removed: Handled by StartTimer_Tick now
-
+            gameTimer.Tick += GameTimer_Tick;//Adds GameTimer_Tick as the event handler for the game loop.
+              
             this.KeyDown += GameForm_KeyDown;
             this.KeyUp += GameForm_KeyUp;
-            //CreateLivesLabel();
+            
             CreateLivesLabel();
             CreateHealthBar();
 
@@ -245,6 +263,7 @@ namespace SemiFinalGame
 
             this.BackgroundImage = null; // Disable default background rendering
             this.DoubleBuffered = true; // Ensure this is definitely on
+            //The game timer is used to continuously update the game state and redraw the game,
 
             // Play Game Music
             SemiFinalGame.Sound.SoundManager.PlayMusic(Properties.Resources.GameFormsound);
@@ -260,15 +279,15 @@ namespace SemiFinalGame
             else if (level == 2)
             {
                 backgroundSpeed = 5.0f;
-                maxLives = 7;   // ✅ MORE LIVES IN LEVEL 2
+                maxLives = 7;   // MORE LIVES IN LEVEL 2
             }
             else
             {
                 backgroundSpeed = 6.0f;
-                maxLives = 4;
+                maxLives = 8;
             }
 
-            lives = maxLives; // 🔴 IMPORTANT: sync lives with maxLives
+            lives = maxLives; // IMPORTANT: sync lives with maxLives
         }
 
         private async void HandlePlayerHit()
@@ -285,17 +304,19 @@ namespace SemiFinalGame
             player.Health = (int)(healthPercentage * 100);
             healthBarForeground.Width = (int)(healthPercentage * healthBarBackground.Width);
 
-            // 3️⃣ Reset player position
+            //  Reset player position
             player.Position = new PointF(100, 300);
             playerSprite.Left = 100;
             playerSprite.Top = 300;
-
+            //await means “wait here without freezing the game.
             await Task.Delay(500);
             isInvincible = false;
 
             if (lives <= 0)
                 GameOver();
         }
+        //An async method is a method that can pause and resume later
+        //without stopping the game or freezing the UI.
 
 
         private void CreateHealthBar()
@@ -316,7 +337,7 @@ namespace SemiFinalGame
                 Size = healthBarBackground.Size,
                 BackColor = Color.Green,
                 Location = healthBarBackground.Location,
-                Anchor = AnchorStyles.Top | AnchorStyles.Right
+                Anchor = AnchorStyles.Top | AnchorStyles.Right//This line locks the control to the top and right edges of the form, so its position stays fixed relative to those edges when the window is resized.
             };
             this.Controls.Add(healthBarForeground);
             healthBarForeground.BringToFront();
@@ -326,7 +347,7 @@ namespace SemiFinalGame
         {
             if (gameEnded) return;
 
-            // ================= PLAYER MOVEMENT =================
+            // PLAYER MOVEMENT 
             string newDirection = null;
 
             if (moveLeft)
@@ -370,7 +391,7 @@ namespace SemiFinalGame
             playerSprite.Left = (int)player.Position.X;
             playerSprite.Top = (int)player.Position.Y;
 
-            // ================= OBSTACLE UPDATE =================
+            // OBSTACLE UPDATE 
             foreach (Obstacle obstacle in obstacles)
             {
                 obstacle.Update();
@@ -384,21 +405,21 @@ namespace SemiFinalGame
             }
 
 
-            // ================= COINS UPDATE =================
+            // COINS UPDATE
             UpdateCoins();
 
-            // ================= STONES UPDATE (Level 2) =================
+            //  STONES UPDATE (Level 2) 
             UpdateStones();
 
 
-            // ================= CHASER UPDATE (Level 3) =================
+            // CHASER UPDATE (Level 3) 
             UpdateChaser();
 
-            // ================= BACKGROUND ANIMATION =================
+            //  BACKGROUND ANIMATION 
 
             UpdateBackground();
             this.Invalidate(); // trigger OnPaint
-        }
+        } 
 
         private void UpdateBackground()
         {
@@ -470,6 +491,7 @@ namespace SemiFinalGame
                     this.Close();
             }
             this.Focus();
+            //File Handling (save in file)
             SaveData.SaveStats(this.currentLevel, this.score, this.coinsCollectedCount, this.lives);
         }
 
@@ -486,7 +508,7 @@ namespace SemiFinalGame
             coinsCollectedCount = 0;
             scoreLabel.Text = "Score: 0";
 
-            // ===== Reset lives and health =====
+            //  Reset lives and health 
             lives = maxLives;                      // Set lives to max
             livesLabel.Text = "Lives: " + lives;   // Update label
 
@@ -519,7 +541,7 @@ namespace SemiFinalGame
             }
             obstacles.Clear();
 
-            // Re-setup Difficulty (in case it changed or for cleanliness)
+            // Re-setup Difficulty (in case it changed or for cleanlines  )
             SetupLevelDifficulty(currentLevel);
 
             // Spawn fresh game objects
@@ -653,7 +675,7 @@ namespace SemiFinalGame
                 }
             }
 
-            // ✅ WIN CONDITION
+            // WIN CONDITION
             if (coins.Count == 0 && !gameEnded)
             {
                 gameEnded = true;
@@ -667,8 +689,7 @@ namespace SemiFinalGame
         {
             // Save Stats on Level Win
             SemiFinalGame.FileHandling.SaveData.SaveStats(this.currentLevel, this.score, this.coinsCollectedCount, this.lives);
-            
-            // Use custom VictoryForm
+           
             // Use custom VictoryForm
             // Pass the current level so VictoryForm can decide to show "Next Level"
             SemiFinalGame.Sound.SoundManager.StopMusic(); // Stop game music
@@ -731,7 +752,7 @@ namespace SemiFinalGame
 
                 int x = spacing * (i + 1);
                 int y = rnd.Next(0, formHeight - box.Height);
-
+                 
                 box.Location = new Point(x, y);
                 box.Image = Properties.Resources.box;
                 box.SizeMode = PictureBoxSizeMode.StretchImage;
@@ -754,8 +775,8 @@ namespace SemiFinalGame
                 }
                 else if (currentLevel == 2)
                 {
-                    minSpeed = 6;   // ✔ faster than Level 1
-                    maxSpeed = 9;   // ✔ but slower than old Level 2
+                    minSpeed = 6;   //  faster than Level 1
+                    maxSpeed = 9;   
                 }
                 else
                 {
@@ -782,8 +803,6 @@ namespace SemiFinalGame
             this.TopMost = true;   // optional
         }
 
-        //private int initialFormWidth;
-        //private int initialFormHeight;
 
         private void CreateLivesLabel()
         {
@@ -800,7 +819,7 @@ namespace SemiFinalGame
                 10
             );
 
-            // 🔴 THIS is the key line
+            // THIS is the key line
             livesLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
             this.Controls.Add(livesLabel);
@@ -824,7 +843,7 @@ namespace SemiFinalGame
             int formWidth = this.ClientSize.Width;
             int formHeight = this.ClientSize.Height;
 
-            // ====== Player ======
+            // Player
             float playerXRatio = player.Position.X / (float)initialFormWidth;
             float playerYRatio = player.Position.Y / (float)initialFormHeight;
 
@@ -832,7 +851,7 @@ namespace SemiFinalGame
             playerSprite.Top = (int)(playerYRatio * formHeight);
             player.Position = new PointF(playerSprite.Left, playerSprite.Top);
 
-            // ====== Coins ======
+            // Coins 
             foreach (Coin coin in coins)
             {
                 float coinXRatio = coin.Body.Position.X / (float)initialFormWidth;
@@ -845,10 +864,11 @@ namespace SemiFinalGame
                 // Update horizontal patrol bounds
                 coin.Movement = new HorizontalPatrolMovement(
                     Math.Max(0, coin.Sprite.Left - 50),
+       
                     Math.Min(formWidth - coin.Sprite.Width, coin.Sprite.Left + 50)
                 );
             }
-            // ====== Obstacles ======
+            //  Obstacles
             foreach (Obstacle obs in obstacles)
             {
                 float obsXRatio = obs.Sprite.Left / (float)initialFormWidth;
@@ -919,10 +939,25 @@ namespace SemiFinalGame
                 // We handle the "recycle" manually when it goes off screen
                 float speed = rnd.Next(5, 12); // Random falling speed
                 
-                // Use existing VerticalPatrolMovement
-                var movement = new VerticalPatrolMovement(-1000, formHeight + 2000, speed);
-
-                stones.Add(new Stone(stoneBox, movement));
+                IMovement movement;
+                if (currentLevel == 3)
+                {
+                    // In Level 3, we use real physics!
+                    stoneBox.BackColor = Color.Transparent; // Fix transparency
+                    movement = null; // PhysicsSystem will handle movement
+                    
+                    Stone physicalStone = new Stone(stoneBox, null);
+                    physicalStone.Body.HasPhysics = true;
+                    // Reduced gravity range for better playability
+                    physicalStone.Body.CustomGravity = 0.5f + (float)rnd.NextDouble() * 0.10f; 
+                    stones.Add(physicalStone);
+                }
+                else
+                {
+                    // Use existing VerticalPatrolMovement for Level 2
+                    movement = new VerticalPatrolMovement(-1000, formHeight + 2000, speed);
+                    stones.Add(new Stone(stoneBox, movement));
+                }
             }
         }
 
@@ -934,9 +969,25 @@ namespace SemiFinalGame
             int formWidth = this.ClientSize.Width;
             Random rnd = new Random();
 
+            // Apply Physics to stones in Level 3
+            if (currentLevel == 3 && stones.Count > 0)
+            {
+                var physicsObjects = stones.Select(s => s.Body).ToList();
+                physicsEngine.Apply(physicsObjects);
+            }
+
             foreach (Stone stone in stones)
             {
-                stone.Update();
+                if (currentLevel != 3)
+                {
+                    stone.Update(); // Uses standard Movement (VerticalPatrolMovement)
+                }
+                else
+                {
+                    // For Physics stones, we only sync the sprite to the body
+                    stone.Sprite.Left = (int)stone.Body.Position.X;
+                    stone.Sprite.Top = (int)stone.Body.Position.Y;
+                }
 
                 // Recycle: If stone goes below screen
                 if (stone.Sprite.Top > formHeight)
@@ -944,6 +995,7 @@ namespace SemiFinalGame
                     // Reset to top with new random X
                     int newX = rnd.Next(50, formWidth - 50);
                     stone.Body.Position = new PointF(newX, rnd.Next(-100, -10));
+                    stone.Body.Velocity = PointF.Empty; // Reset momentum for physics stones
                     stone.Sprite.Top = (int)stone.Body.Position.Y;
                     stone.Sprite.Left = (int)stone.Body.Position.X;
                 }
@@ -973,7 +1025,7 @@ namespace SemiFinalGame
             // Create Sprite
             chaserSprite = new PictureBox();
             chaserSprite.Size = new Size(60, 60);
-            chaserSprite.BackColor = Color.DarkBlue; // Placeholder if no image
+            chaserSprite.BackColor = Color.Red; // Placeholder if no image
             // chaserSprite.Image = ... (If you have an image, e.g. Properties.Resources.enemy);
             chaserSprite.Location = new Point(this.ClientSize.Width - 100, 100); // Start top-right
             chaserSprite.SizeMode = PictureBoxSizeMode.StretchImage;

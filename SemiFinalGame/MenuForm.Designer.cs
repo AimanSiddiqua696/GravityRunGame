@@ -28,52 +28,55 @@ namespace SemiFinalGame
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnStart = new System.Windows.Forms.Button();
-            this.btnExit = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            btnStart = new Button();
+            btnExit = new Button();
+            SuspendLayout();
             // 
             // btnStart
             // 
-            this.btnStart.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnStart.BackColor = System.Drawing.Color.Gold;
-            this.btnStart.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStart.Font = new System.Drawing.Font("Arial", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnStart.Location = new System.Drawing.Point(300, 250);
-            this.btnStart.Name = "btnStart";
-            this.btnStart.Size = new System.Drawing.Size(200, 80);
-            this.btnStart.TabIndex = 0;
-            this.btnStart.Text = "START";
-            this.btnStart.UseVisualStyleBackColor = false;
-            this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
+            btnStart.Anchor = AnchorStyles.None;
+            btnStart.BackColor = Color.Gold;
+            btnStart.FlatStyle = FlatStyle.Flat;
+            btnStart.Font = new Font("Arial", 24F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnStart.Location = new Point(332, 886);
+            btnStart.Margin = new Padding(5, 6, 5, 6);
+            btnStart.Name = "btnStart";
+            btnStart.Size = new Size(333, 154);
+            btnStart.TabIndex = 0;
+            btnStart.Text = "START";
+            btnStart.UseVisualStyleBackColor = false;
+            btnStart.Click += btnStart_Click;
             // 
             // btnExit
             // 
-            this.btnExit.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnExit.BackColor = System.Drawing.Color.IndianRed;
-            this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExit.Font = new System.Drawing.Font("Arial", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnExit.Location = new System.Drawing.Point(300, 350);
-            this.btnExit.Name = "btnExit";
-            this.btnExit.Size = new System.Drawing.Size(200, 80);
-            this.btnExit.TabIndex = 1;
-            this.btnExit.Text = "EXIT";
-            this.btnExit.UseVisualStyleBackColor = false;
-            this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
+            btnExit.Anchor = AnchorStyles.None;
+            btnExit.BackColor = Color.IndianRed;
+            btnExit.FlatStyle = FlatStyle.Flat;
+            btnExit.Font = new Font("Arial", 24F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnExit.Location = new Point(752, 886);
+            btnExit.Margin = new Padding(5, 6, 5, 6);
+            btnExit.Name = "btnExit";
+            btnExit.Size = new Size(333, 154);
+            btnExit.TabIndex = 1;
+            btnExit.Text = "EXIT";
+            btnExit.UseVisualStyleBackColor = false;
+            btnExit.Click += btnExit_Click;
             // 
             // MenuForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImage = global::SemiFinalGame.Properties.Resources.main;
-            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.ClientSize = new System.Drawing.Size(800, 600);
-            this.Controls.Add(this.btnExit);
-            this.Controls.Add(this.btnStart);
-            this.DoubleBuffered = true;
-            this.Name = "MenuForm";
-            this.Text = "MenuForm";
-            this.Load += new System.EventHandler(this.MenuForm_Load);
-            this.ResumeLayout(false);
+            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackgroundImage = Properties.Resources.main;
+            BackgroundImageLayout = ImageLayout.Stretch;
+            ClientSize = new Size(1333, 1154);
+            Controls.Add(btnExit);
+            Controls.Add(btnStart);
+            DoubleBuffered = true;
+            Margin = new Padding(5, 6, 5, 6);
+            Name = "MenuForm";
+            Text = "MenuForm";
+            Load += MenuForm_Load;
+            ResumeLayout(false);
 
         }
 
