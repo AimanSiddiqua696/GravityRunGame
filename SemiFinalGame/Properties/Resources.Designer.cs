@@ -199,6 +199,16 @@ namespace SemiFinalGame.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap leftside {
+            get {
+                object obj = ResourceManager.GetObject("leftside", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap main {
             get {
                 object obj = ResourceManager.GetObject("main", resourceCulture);
@@ -241,6 +251,16 @@ namespace SemiFinalGame.Properties {
         internal static System.IO.UnmanagedMemoryStream retro_coin_4_236671 {
             get {
                 return ResourceManager.GetStream("retro-coin-4-236671", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap rightside {
+            get {
+                object obj = ResourceManager.GetObject("rightside", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
